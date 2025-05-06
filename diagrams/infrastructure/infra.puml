@@ -1,0 +1,97 @@
+@startuml
+
+scale 2
+skinparam linetype ortho
+left to right direction
+
+!include <awslib/AWSCommon>
+'!include <awslib/AWSSimplified>
+!include <awslib/Groups/AWSCloud>
+!include <awslib/Groups/VPC>
+!include <awslib/Groups/Generic>
+!include <awslib/General/Users>
+!include <awslib/SecurityIdentityCompliance/Cognito>
+!include <awslib/ApplicationIntegration/APIGateway>
+!include <awslib/NetworkingContentDelivery/Route53>
+!include <awslib/NetworkingContentDelivery/ElasticLoadBalancing>
+!include <awslib/NetworkingContentDelivery/CloudFront>
+!include <awslib/Compute/EC2>
+!include <awslib/Database/RDS>
+!include <awslib/Analytics/ManagedStreamingforApacheKafka>
+!include <awslib/Compute/Lambda>
+!include <awslib/Storage/SimpleStorageService>
+!include <awslib/ManagementGovernance/CloudWatch>
+!include <awslib/ManagementGovernance/CloudTrail>
+!include <awslib/Database/ElastiCache>
+
+
+Users(sources1, "Users", "spa/mobile")
+' Users(sources2, "Users", "Asia")
+' Users(sources3, "Users", "Europe")
+
+
+
+AWSCloudGroup(cloud) {
+    Route53(route53, "Route 53", "DNS")
+    GenericGroup(fe_target, "User interface") {
+        CloudFront(cloudfront, "Cloud front", "spa file")
+        SimpleStorageService(fe_assets, "Frontend assets", "aws-bucket")
+    }
+
+    APIGateway(gateway, "API Gateway", "AGW")
+    '  Cognito(userAuth, "User Auth", "JWT")'
+    VPCGroup(vpc) {
+        ElasticLoadBalancing(elb, "ELB", "ALB")
+        GenericGroup(ec2_target, "Target Group") {
+            EC2(ec21, "EC2", "2")
+            EC2(ec22, "EC2", "1")
+        }
+
+        GenericGroup(db_target, "Microservice DBs") {
+            RDS(rds, "RDS", "Postgresql1")
+            RDS(rdsn, "RDS", "Postgresql ... n")
+           
+        }
+
+        GenericGroup(aec_target, "Elastic cache") {
+            ElastiCache(aec, "Redis", "AEC")
+            ElastiCache(aec2, "Redis", "AEC ... n")
+           
+        }
+
+        ManagedStreamingforApacheKafka(broker, "Kafka", "MKS")
+       
+        GenericGroup(logging_monitoring, "Logging & monitoring") {
+           CloudWatch(cloudwatch, "CloudWatch", "CloudWatch")
+           CloudTrail(cloudtrail, "CloudTrail", "CloudTrail")
+        }
+
+    }
+   
+    SimpleStorageService(s3, "Amazon S3", "aws-bucket")
+}
+
+cloudfront --> fe_assets
+
+sources1 --> route53
+sources1 --> fe_target
+route53 --> gateway
+' gateway --> userAuth
+gateway --> elb
+' sources2 --> userAuth
+' sources3 --> userAuth
+' userAuth --> elb
+elb --> ec2_target
+ec2_target --> db_target
+ec2_target --> db_target
+ec2_target --> db_target
+ec2_target --> aec_target
+
+
+ec2_target --> s3
+ec2_target --> broker
+
+' elb .right.> lambda
+' lambda .down.> s3
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+Person(user , "Customer", "Patient")
+Person(doctor , "Doctor", "Clinic")
+
+System(projectY, "ProjectY", "Electronic Medical Record System")
+
+Rel(user, projectY, "Uses", "https")
+Rel(doctor, projectY, "Uses", "https")
+
+
+System_Ext(notifications, "Notification service", "sms/email" )
+System_Ext(billing, "Billing service", "payments" )
+
+Rel(projectY, notifications, "Uses", "https")
+Rel(projectY, billing, "Uses", "https")
+
+
+SHOW_LEGEND()
+@endyaml

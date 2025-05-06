@@ -1,0 +1,29 @@
+@startuml 
+
+actor "Patient" as Patient
+participant "SPA/Mobile app" as App
+participant "Amazon Cognito" as Cognito
+participant "API Gateway" as APIGW
+participant "BackendApi" as BackendApi
+database "PostgresDB" as Postgres
+
+== Login/SignUp ==
+Patient -> App: Login/SignUp
+App -> Cognito: SignUp/SignIn (Amplify SDK)
+Cognito --> App: JWT-token (ID, Access)
+
+== GET Patient medical data (EMR) ==
+Patient -> App: EMR request 
+App -> APIGW: GET /medical-records\n**Authorization: Bearer <JWT>**
+APIGW -> Cognito: JWT token validation (Cognito Authorizer)
+Cognito --> APIGW: ✔ Valid  (or error 403)
+
+== Backend api  processing ==
+APIGW -> BackendApi: Call get patient EMR function
+BackendApi -> Postgres: get patient data query
+Postgres --> BackendApi: EMR data
+BackendApi --> APIGW: Response (200 + JSON)
+APIGW --> App: result
+App --> Patient: result view
+
+@enduml

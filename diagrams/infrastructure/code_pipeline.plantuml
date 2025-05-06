@@ -1,0 +1,29 @@
+@startuml AWS CodePipeline with Human Approval
+
+!include <awslib/AWSCommon>
+!include <awslib/DeveloperTools/CodePipeline>
+!include <awslib/DeveloperTools/CodeBuild>
+!include <awslib/DeveloperTools/CodeDeploy>
+!include <awslib/Compute/EC2>
+!include <awslib/General/User>
+!include <awslib/General/GitRepository>
+
+' Определение компонентов
+GitRepository(gr, "Git repo", "git")
+CodePipeline(my_pipeline, "Deployment Pipeline", "Prod Deployment") 
+CodeBuild(codebuild, "Build Stage", "Compile & Test")
+CodeDeploy(codedeploy_dev, "Dev Deploy", "AWS CodeDeploy")
+CodeDeploy(codedeploy_prod, "Prod Deploy", "AWS CodeDeploy")
+EC2(ec2_dev, "Dev EC2", "t3.medium")
+EC2(ec2_prod, "Prod EC2", "m5.large")
+User(approval, "Manual Approval", "Team Lead")
+
+
+gr -right-> my_pipeline
+my_pipeline -right-> codebuild 
+codebuild -right-> codedeploy_dev
+codedeploy_dev -down-> ec2_dev 
+codedeploy_dev -right-> approval
+approval -right-> codedeploy_prod
+codedeploy_prod -down-> ec2_prod
+@enduml

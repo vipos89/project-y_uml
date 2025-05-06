@@ -1,0 +1,62 @@
+@startuml 
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!include <cloudinsight/kafka>
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!include DEVICONS/redis.puml
+!include DEVICONS/postgresql.puml
+!include DEVICONS/react.puml
+
+
+
+LAYOUT_TOP_DOWN()
+skinparam linetype ortho
+
+
+Person(user , "Patient")
+Person(doctor , "Doctor")
+' Person(admin , "Admin")
+
+System_Boundary(c1, "ProjectY", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+    Container(spa, "SPA", "ReactJS", $sprite="react")
+    Container(mob_app, "Mobile app (Ios/Android)", "React Native", $sprite="react")
+    Container(back_api, "Backend api", "Golang")
+    ContainerDb(db, "Database", "PostgreSQL", "Holds product, order and invoice information", $sprite="postgresql")
+    ContainerQueue(kafka, "Message Broker", "Kafka", $sprite="kafka")
+    ContainerDb(redis, "Redis", $sprite="redis")
+}
+
+
+System_Boundary(c2, "Logging and Monitoring", $link="https://github.com/plantuml-stdlib/C4-PlantUML") {
+  Container(monitoring, "CloudWatch")
+  Container(logger, "CloudTrail")
+}
+
+Lay_Down(c1, c2)
+
+Rel(c1, c2, "Writes")
+
+Rel(user, spa, "Uses", "https")
+Rel(user, mob_app, "Uses", "https")
+Rel(doctor, spa, "Uses", "https")
+Rel(back_api, redis, "Read/Writes")
+Rel_L(back_api, db, "Read/Writes")
+BiRel(spa, back_api, "Uses", "https")
+BiRel(mob_app, back_api, "Uses", "https")
+Rel_R(back_api, kafka, "Read/Writes")
+
+
+
+System_Ext(notifications, "Notification service", "sms/email" )
+System_Ext(billing, "Billing service", "payments" )
+
+Lay_Down(notifications, billing)
+
+Rel_L(back_api, notifications, "Uses", "https")
+Rel_R(back_api, billing, "Uses", "https")
+Rel_L(notifications, user, "Uses")
+
+SHOW_LEGEND()
+@enduml

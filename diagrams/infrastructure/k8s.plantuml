@@ -1,0 +1,54 @@
+@startuml
+
+scale 2
+skinparam linetype ortho
+left to right direction
+
+!include <awslib/AWSCommon>
+!include <awslib/Groups/AWSCloud>
+!include <awslib/Groups/VPC>
+!include <awslib/Groups/AvailabilityZone>
+!include <awslib/Containers/ElasticKubernetesService>
+!include <awslib/Containers/ECSAnywhere>
+
+
+!include <awslib/Groups/Region>
+!include <awslib/Groups/PrivateSubnet>
+
+!include <awslib/Compute/EC2>
+!include <awslib/Compute/EC2Instance>
+
+
+AWSCloudGroup(cloud) {
+    VPCGroup(vpc_eks) {
+        ElasticKubernetesService(eks, "Elastic Kubernates Service", "eks")
+        ECSAnywhere(ecs, "ecs", "ecs")
+    }
+    VPCGroup(vpc_instances) {
+        
+        AvailabilityZoneGroup(az, "\tAvailability Zone: eu-west-1a\t") {
+            PrivateSubnetGroup(p1, "Private subnet") {
+                EC2Instance(i1, "Instance", "Server") #Transparent
+                
+            }
+        }
+        AvailabilityZoneGroup(az2, "\tAvailability Zone: eu-west-2a\t") {
+            PrivateSubnetGroup(p2, "Private subnet") {
+                EC2Instance(i2, "Instance", "Server") #Transparent
+            }
+        }
+        AvailabilityZoneGroup(azn, "\tAvailability Zone: eu-west-na\t") {
+            PrivateSubnetGroup(pn, "Private subnet") {
+                EC2Instance(in, "Instance", "Server") #Transparent
+            }
+        }
+    }
+    
+}
+ eks -[hidden]-> ecs
+ 
+ az -[hidden]-> az2
+ az2 -[hidden]-> azn
+
+
+@enduml
