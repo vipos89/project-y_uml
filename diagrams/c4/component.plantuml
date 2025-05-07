@@ -1,3 +1,30 @@
-@startuml 
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(ProjectYService, "ProjectY Medical System") {
+    Container(api, "API", "Golang", "Handles incoming HTTP requests.") {
+        Component(auth, "Auth service", "Handles auth requests.")
+        Component(account, "Account service", "Handles accounts requests.")
+        Component(emr, "Electronical Medical Records", "Handles emr endpoints.")
+        Component(billing, "Internal Billing Service", "Handle payments requests")
+        Component(notification, "Internal notification Service", "Handle notification requests")
+        Component(ers, "Electronic receipt Service", "Handle notification requests")
+
+        Component(scheduling, "Online appointment scheduling", "Handle appointment requests")
+        Component(doctor_scheduling, "Doctor schedule management", "Handle Doctor's schedule requests")
+
+
+    }
+    ContainerDb(database, "Orders Database", "SQL Database", "Stores order and product data")
+    ContainerQueue(kafka, "Message Broker", "Kafka")
+}
+
+System_Boundary(External_Boundary, "External services"){
+    System_Ext(ext_notifications, "Notification service", "sms/email" )
+    System_Ext(ext_billing, "Mainframe Banking System", "payment processing" , "service")
+}
+
+
 
 @enduml
